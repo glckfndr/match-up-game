@@ -1,29 +1,20 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { forwardRef } from "react";
+import React, { forwardRef, useRef, useImperativeHandle } from "react";
 import { LocalSvg } from "react-native-svg/css";
 
 const WIDTH = 90;
 const HEIGHT = 90;
 
-export default function OrnamentImage({ image }) {
+const OrnamentImage = forwardRef(function ({ image }, ref) {
   return (
-    <View style={styles.ornamentContainer}>
+    <View style={styles.ornamentContainer} ref={ref}>
       <LocalSvg asset={image} height={HEIGHT} width={WIDTH} />
       <View style={styles.textContainer}>
         <Text style={styles.text}></Text>
       </View>
     </View>
   );
-}
-
-export const Picture = forwardRef(({ image }, ref) => (
-  <View style={styles.ornamentContainer} ref={ref}>
-    <LocalSvg asset={image} height={HEIGHT} width={WIDTH} />
-    <View style={styles.textContainer}>
-      <Text style={styles.text}></Text>
-    </View>
-  </View>
-));
+});
 
 const styles = StyleSheet.create({
   textContainer: {
@@ -46,3 +37,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+export default OrnamentImage;
