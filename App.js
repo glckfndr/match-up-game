@@ -1,64 +1,62 @@
-import { StatusBar } from "expo-status-bar";
-import { Button, StyleSheet, Text, View } from "react-native";
+import {
+  Button,
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import AnimatedText from "./components/AnimatedText";
 import OrnamentImage from "./components/OrnamentImage";
 import { useRef, useEffect } from "react";
 import { HEIGHT, ornaments, WIDTH } from "./constants/ornaments";
-
-function shuffle(array) {
-  var random = array.map(Math.random);
-  array.sort(function (a, b) {
-    return random[array.indexOf(a)] - random[array.indexOf(b)];
-  });
-}
+import {
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+import shuffle from "./services/shuffle";
 
 export default function App() {
-  const pictureRef = [
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-  ];
+  const rotateZ = Array(8)
+    .fill(null)
+    .map(() => useSharedValue(0));
+  const indexes = useRef([...Array(8).keys()]);
 
-  const ind2 = [0, 1, 2, 3, 4, 5, 6, 7];
+  const triggerAnimations = (i) => {
+    return (shouldAnimate) => {
+      rotateZ[i].value = withTiming(20, { duration: 100 }, () => {
+        rotateZ[i].value = withSpring(0, { duration: 500 });
+      });
+    };
+  };
 
-  function handleRef() {
-    // for (let key in pictureRef.current) {
-    //   console.log(key);
-    // }
-    // pictureRefs.current.measure((x, y, width, height, pageX, pageY) => {
-    //   console.log(pageX, pageY, width);
-    // })
-    // pictureRefs.current.getBoundingClientRect()
-    // pictureRefs.current.measure((rect) => {
-    //   console.log("Element coordinates:", rect);
-    //   console.log(`X: ${rect.x}`);
-    //   console.log(`Y: ${rect.y}`);
-    //   console.log(`Width: ${rect.width}`);
-    //   console.log(`Height: ${rect.height}`);
-    //   console.log(`PageX: ${rect.pageX}`);
-    //   console.log(`PageY: ${rect.pageY}`);
-    // });
-  }
+  const pictureRef = Array(8)
+    .fill(null)
+    .map(() => useRef(null));
 
-  // shuffle(ind2);
-  // shuffle(ind2);
-  // res = [];
-  // for (let i = 0; i < ind2.length; i++) {
-  //   res[i] = ind2[i] - i;
-  // }
-  // console.warn(res, ind2);
-  res = ind2;
+  shuffle(indexes.current);
+  shuffle(indexes.current);
+
+  console.log(indexes.current);
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
+    <GestureHandlerRootView
+      style={{
+        flex: 1,
+      }}
+    >
+      <SafeAreaView style={styles.container}>
+        <Text
+          style={[styles.intro, { textShadowOffset: { width: 3, height: 4 } }]}
+        >
+          Принципи побудови статичних та динамічних мотивів
+        </Text>
         <Text style={styles.title}>Знайти відповідність</Text>
+
         <View
           style={{
             width: "100%",
@@ -67,10 +65,14 @@ export default function App() {
             marginBottom: 12,
           }}
         >
-          <OrnamentImage image={ornaments[0].img} ref={pictureRef[0]} />
-          <OrnamentImage image={ornaments[1].img} ref={pictureRef[1]} />
-          <OrnamentImage image={ornaments[2].img} ref={pictureRef[2]} />
-          <OrnamentImage image={ornaments[3].img} ref={pictureRef[3]} />
+          {indexes.current.slice(0, 4).map((i) => (
+            <OrnamentImage
+              key={i}
+              image={ornaments[i].img}
+              ref={pictureRef[i]}
+              rotateZ={rotateZ[i]}
+            />
+          ))}
         </View>
         <View
           style={{
@@ -79,10 +81,32 @@ export default function App() {
             justifyContent: "space-around",
           }}
         >
-          <OrnamentImage image={ornaments[4].img} ref={pictureRef[4]} />
-          <OrnamentImage image={ornaments[5].img} ref={pictureRef[5]} />
-          <OrnamentImage image={ornaments[6].img} ref={pictureRef[6]} />
-          <OrnamentImage image={ornaments[7].img} ref={pictureRef[7]} />
+          {indexes.current.slice(4, 8).map((i) => (
+            <OrnamentImage
+              key={i}
+              image={ornaments[i].img}
+              ref={pictureRef[i]}
+              rotateZ={rotateZ[i]}
+            />
+          ))}
+        </View>
+        {/* {shuffle(indexes)} */}
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "space-around",
+            paddingTop: 40,
+          }}
+        >
+          {indexes.current.slice(0, 4).map((i, ind) => (
+            <AnimatedText
+              key={i}
+              ornamentRef={pictureRef[ind]}
+              word={ornaments[ind].name} //56_1
+              triggerAnimation={triggerAnimations(ind)}
+            />
+          ))}
         </View>
         <View
           style={{
@@ -92,57 +116,19 @@ export default function App() {
             paddingTop: 40,
           }}
         >
-          <AnimatedText
-            ornamentRef={pictureRef[1]}
-            word={ornaments[ind2[1]].name} //56_1
-          />
-
-          <AnimatedText
-            ornamentRef={pictureRef[2]}
-            word={ornaments[ind2[2]].name} //56_1
-          />
-
-          <AnimatedText
-            ornamentRef={pictureRef[3]}
-            word={ornaments[ind2[3]].name} //56_1
-          />
-
-          <AnimatedText
-            ornamentRef={pictureRef[0]}
-            word={ornaments[ind2[0]].name} //56_1
-          />
-        </View>
-        <View
-          style={{
-            width: "100%",
-            flexDirection: "row",
-            justifyContent: "space-around",
-            paddingTop: 40,
-          }}
-        >
-          <AnimatedText
-            ornamentRef={pictureRef[5]}
-            word={ornaments[ind2[5]].name} //56_1
-          />
-          <AnimatedText
-            ornamentRef={pictureRef[4]}
-            word={ornaments[ind2[4]].name} //56_1
-          />
-
-          <AnimatedText
-            ornamentRef={pictureRef[6]}
-            word={ornaments[ind2[6]].name} //56_1
-          />
-
-          <AnimatedText
-            ornamentRef={pictureRef[7]}
-            word={ornaments[ind2[7]].name} //56_1
-          />
+          {indexes.current.slice(4, 8).map((i, ind) => (
+            <AnimatedText
+              key={i}
+              ornamentRef={pictureRef[ind + 4]}
+              word={ornaments[ind + 4].name} //56_1
+              triggerAnimation={triggerAnimations(ind + 4)}
+            />
+          ))}
         </View>
         {/* <Button onPress={handleRef} title="Click me on ref" /> */}
         {/* <Button onPress={handleTranslate} title="Click me on move" /> */}
-      </View>
-      <StatusBar style="auto" />
+        {/* <StatusBar style="auto" /> */}
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
@@ -152,10 +138,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#bba",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     borderWidth: 5,
     borderRadius: 12,
     borderColor: "#a66",
+    marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  },
+  intro: {
+    fontSize: 24,
+    fontStyle: "normal",
+    fontWeight: "500",
+    marginTop: 12,
+    textAlign: "center",
+    marginVertical: 32,
+    marginHorizontal: 12,
+    color: "#008800",
+    textShadowColor: "#777",
   },
   title: { fontSize: 32, fontWeight: "bold", marginBottom: 32 },
   text: {

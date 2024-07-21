@@ -13,7 +13,7 @@ import React, { useState, useRef, useEffect } from "react";
 const WIDTH = 90;
 const HEIGHT = 90;
 
-const AnimatedText = ({ word, ornamentRef }) => {
+const AnimatedText = ({ word, ornamentRef, triggerAnimation }) => {
   const offset = useSharedValue({ x: 0, y: 0 });
   const isPressed = useSharedValue(false);
   const imagePos = useSharedValue({ x: 0, y: 0 });
@@ -59,12 +59,13 @@ const AnimatedText = ({ word, ornamentRef }) => {
       runOnJS(calculateDistance)(e.absoluteX, e.absoluteY);
     })
     .onEnd((e) => {
-      if (Math.abs(delta.value.x) < 30 && Math.abs(delta.value.y) < 30)
+      if (Math.abs(delta.value.x) < 30 && Math.abs(delta.value.y) < 30) {
         offset.value = withSpring({
           x: imagePos.value.x - absolutePosition.x - WIDTH / 1.5 + 2,
           y: imagePos.value.y - absolutePosition.y - 13,
         });
-      else offset.value = withSpring(start.value);
+        runOnJS(triggerAnimation)(true);
+      } else offset.value = withSpring(start.value);
     })
     .onFinalize(() => {
       isPressed.value = false;

@@ -1,18 +1,25 @@
 import { StyleSheet, Text, View } from "react-native";
 import React, { forwardRef, useRef, useImperativeHandle } from "react";
 import { LocalSvg } from "react-native-svg/css";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 const WIDTH = 90;
 const HEIGHT = 90;
 
-const OrnamentImage = forwardRef(function ({ image }, ref) {
+const OrnamentImage = forwardRef(function ({ image, rotateZ }, ref) {
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotateZ: `${rotateZ.value}deg` }],
+    };
+  });
+
   return (
-    <View style={styles.ornamentContainer} ref={ref}>
+    <Animated.View style={[styles.ornamentContainer, animatedStyle]} ref={ref}>
       <LocalSvg asset={image} height={HEIGHT} width={WIDTH} />
       <View style={styles.textContainer}>
         <Text style={styles.text}></Text>
       </View>
-    </View>
+    </Animated.View>
   );
 });
 
